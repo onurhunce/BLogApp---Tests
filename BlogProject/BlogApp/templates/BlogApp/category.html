@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+   <html>
+   <head>
+    <link href="../static/BlogApp/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../static/BlogApp/css/blog.css" rel="stylesheet">
+    {% load blog_tags %}
+    {%main%}
+   </head>
+
+   <body>   
+      <div class="list-group">
+        {% for blog in all_categories %}
+          <a href="/Category/{{blog.0}}" class="list-group-item"> {{blog.0}} </a>    
+        {% endfor %}
+       </div>  
+   </body>
+   </html>

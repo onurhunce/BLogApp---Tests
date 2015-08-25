@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+   {% load xmpp_tags %}
+
+</head>
+<body>
+   {% load blog_tags %}
+  
+   {%main%}
+	<div class="container">
+	<h2 style="padding-top:20px; text-align:center"> ADD NEW BLOG </h2>
+	<form action="/add_blog/" method="post">{% csrf_token %}
+		<!--<p><b> Title: </b> {{form.title}} </p>-->
+		<!--<p>{{form.body}} </p>-->
+		<!--{{form.owner.as_hidden}}-->
+		<!--{{form.publish_date.as_hidden}}-->
+		<!--<p><b> Category: </b> {{form.category}} </p>-->
+		<!--<p> {{form.image}} </p>-->
+		{{form.as_p}}
+		<input type="submit" class="btn btn-primary" value="Submit" />
+	</form>
+</div>
+
+{% conversejs_initialize %}
+
+
+</body>
+</html>

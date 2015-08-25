@@ -1,0 +1,103 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+</head>
+
+  <body>
+   {% load blog_tags %}
+   {% if login%}
+    
+    <a class="navbar-form navbar-right" href="/accounts/logout" style="color:white; padding-right:30px" class="button"> Log out </a>
+    {%if username%}
+    <p class="navbar-form navbar-right" style="color:white"> Welcome, {{username}}! </p>
+{%endif%}
+   {%else%}
+   <form  class="navbar-form navbar-right"action="/accounts/auth/"
+    method="post" > {% csrf_token %}
+      <label for="userlogin"> </label>
+      <input type="text" name="username" placeholder="Username"  value=""
+             id="userlogin">
+      <label for="password_login"></label>
+      <input type="password" name="password" placeholder="Password" value=""
+             id="password_login">
+      <button type="submit" class="btn btn-success" id="login_button"
+              value="login_button">
+          Log in
+      </button>
+      <a href="/accounts/register" class="btn btn-primary"> Register</a>
+    </form>
+    {%endif%}
+<!--        <form class="navbar-form navbar-right"  
+              action="/accounts/auth/" method="post">{% csrf_token %}
+            <div class="form-group">
+              <input type="text" placeholder="Username" id="username" class="form-control">
+            </div>
+            <div class="form-group">
+              <input type="password" placeholder="Password" id="password" class="form-control">
+            </div>
+            <button type="submit" value="login" class="btn btn-success">Login</button>
+          
+        </form> -->
+      
+           {%main%}
+    <div class="container">
+
+      <div class="blog-header">
+        <h1 class="blog-title">Blog Press</h1>
+        <p class="lead blog-description">Blog Web site Project by Markafoni Intern.</p>
+      </div>
+
+      <div class="row">
+        <div class="col-sm-8 blog-main">   
+          <div class="blog-post">
+            {% for blogs in all_blogs %}
+            <h2 class="blog-post-title">{{blogs.title}} </h2>
+            <p class="blog-post-meta">{{blogs.publish_date}} by <a href="/user/{{blogs.owner.slug_name}}/">{{blogs.owner}}</a></p>
+              {{blogs.body}}
+            </p>
+            {% endfor %}
+          </div><!-- /.blog-post -->
+        </div><!-- /.blog-main -->
+
+        <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
+          <div class="sidebar-module sidebar-module-inset">
+           {%if user.is_authenticated %}
+            <h4>Go To My Profile</h4>
+            <a class="blog-nav-item" style="color:blue" href="/user/{{username.slug_name}}">My Profile</a>
+          </div>
+           {%endif%}
+          <div class="sidebar-module">
+            <h4>Archives</h4>
+            <ol class="list-unstyled">
+              <li><a href="/2015/12">December 2015</a></li>
+              <li><a href="/2015/11">November 2015</a></li>
+              <li><a href="/2015/10">October 2015</a></li>
+              <li><a href="/2015/9">September 2015</a></li>
+              <li><a href="/2015/8">August 2015</a></li>
+              <li><a href="/2015/7">July 2015</a></li>
+              <li><a href="/2015/6">June 2015</a></li>
+              <li><a href="/2015/5">May 2015</a></li>
+              <li><a href="/2015/4">April 2015</a></li>
+              <li><a href="/2015/3">March 2015</a></li>
+              <li><a href="/2015/2">February 2015</a></li>
+              <li><a href="/2015/1">January 2015</a></li>
+            </ol>
+          </div>
+          <div class="sidebar-module">
+            <h4>Social Media</h4>
+            <ol class="list-unstyled">
+              <li><a href="https://github.com/">GitHub</a></li>
+              <li><a href="https://twitter.com/">Twitter</a></li>
+              <li><a href="https://www.facebook.com/">Facebook</a></li>
+            </ol>
+          </div>
+        </div><!-- /.blog-sidebar -->
+
+      </div><!-- /.row -->
+
+    </div><!-- /.container -->
+
+  </body>
+</html>

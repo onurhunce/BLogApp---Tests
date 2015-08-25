@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title> Register</title>
+</head>
+<body>
+
+<h2 style="text-align:center"> REGISTER </h2>
+
+
+<form action="/accounts/register/" method="post">{% csrf_token %} 
+
+{{form}}
+
+<button type="submit" class="btn btn-primary" value="Register"> Register </button>
+
+</form>
+</body>
+</html>

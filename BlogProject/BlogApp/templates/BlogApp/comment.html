@@ -1,0 +1,92 @@
+<!--             <div class="tab-content">
+                <div class="tab-pane active" id="comments-logout">                
+                    <ul class="media-list">
+                        <li class="media">
+                        <div class="media-body">
+                        {%for comment in comments%}
+
+                            {% if comment.reply == None%}
+                        <div class="well well-lg">
+                            <p class="media-comment">
+                            <ul class="media-date text-uppercase reviews list-inline">
+                            <h3 class="media-heading text-uppercase reviews">   
+                                <p> {{comment.comment_name}} </p> 
+                            </h3>
+                            <p> {{comment}} </p>   
+                            {%for reply in comments%}                    
+                                {%if reply.reply == comment%}                        
+                            <h3 class="media-heading text-uppercase reviews "> 
+                                <p style="margin-left:15px"> {{reply.comment_name}} </p>  
+                            </h3>
+                            <p style="margin-left:15px" class="bg-info"> {{reply}} </p>
+                                {%endif%}
+                                                        	
+
+                            {%endfor%}
+                            <button class="btn btn-info btn-circle text-uppercase" 
+                                style=" margin-top:5px" class="btn btn-primary">Reply
+                            </button> 
+                         </ul>
+                         </p>
+                        </div>
+                             
+                            {%endif%}
+                        {%endfor%}  
+
+                        </div>
+                        </li>
+                    </ul>
+                    </div>
+                    </div> -->
+
+
+            <div class="tab-content">
+                <div class="tab-pane active" id="comments-logout">                
+                    <ul class="media-list">
+                        <li class="media">
+                        <div class="media-body">
+                        {%for comment in comments%}
+                            {% if comment.reply == None%}
+                        <div class="well well-lg">
+                            <p class="media-comment">
+                            <ul class="media-date text-uppercase reviews list-inline">
+                            <h3 class="media-heading text-uppercase reviews">   
+                                <p> {{comment.comment_name}} </p> 
+                            </h3>
+                            <p> {{comment}} </p>   
+                            {%for reply in replies%}                    
+                                {%if reply.reply == comment%}                        
+                            <h3 class="media-heading text-uppercase reviews "> 
+                                <p style="margin-left:15px"> {{reply.comment_name}} </p>  
+                            </h3>
+                            <p style="margin-left:15px" class="bg-info"> {{reply}} </p>
+
+                            {%for second in replies%}                    
+                                {%if second.reply in replies%}
+                                {%if second.reply = reply %}                    
+                            <h3 class="media-heading text-uppercase reviews "> 
+                                <p style="margin-left:40px"> {{second.comment_name}} </p>  
+                            </h3>
+                            <p style="margin-left:40px" class="bg-success"> {{second}} </p>
+                                {%endif%}   
+                                 {%endif%}                                                     
+                            {%endfor%}
+
+                                {%endif%}  
+
+                            {%endfor%}
+
+                            <button class="btn btn-info btn-circle text-uppercase" 
+                                style=" margin-top:5px" class="btn btn-primary">Reply
+                            </button> 
+                         </ul>
+                         </p>
+                        </div>
+                             
+                            {%endif%}
+                        {%endfor%}  
+                        </div>
+                        </li>
+                    </ul>
+                    </div>
+                    </div>

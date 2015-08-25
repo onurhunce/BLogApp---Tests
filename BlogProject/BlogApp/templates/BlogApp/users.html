@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+    <link href="/static/BlogApp/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="/static/BlogApp/css/blog.css" rel="stylesheet">    
+</head>
+<body>
+
+  {% load blog_tags %}
+   {%main%}
+<div class="col-md-6 blog-main" style="margin-top:40px">  
+  <div class="list-group-item">      
+  <div class="blog-post">
+          <div class="list-group">
+          <h1 style="text-align:center; margin-bottom:60px"> PROFILE </h1>
+   {{friendship}}
+
+      {% for user in name %}
+    {% if forloop.counter == 1%}
+    <div class="col-md-4">
+          {%if user.owner.profile_pic%}    
+          <a href="{{user.owner.profile_pic.url}}"><img alt="" 
+          src="{{user.owner.profile_pic.thumbnail.url}}" class="img-circle" /></a>
+          {%else%}
+          <p> There is no image.</p>
+          <hr>  
+          {%endif%}      
+    </div>
+    <h3> {{user.owner.full_name}} </h3> 
+    <hr>
+     <h3> {{user.owner.location}} </h3> 
+     <hr>
+      <h3> {{user.owner.age}} </h3> 
+       <hr>
+
+        {%if request.user != user.owner.user%}
+
+            <div class="actionBox">
+                <form action="/user/{{user.owner.slug_name}}/"  onclick="return checkform()"
+                method="POST" class="form-inline" 
+                role="form">{% csrf_token %}
+                    <input type="hidden">
+                    <div class="form-group" style="margin-top:10px">
+                            {{form.friend.as_hidden}}
+                            {{form.added_friend.as_hidden}}
+                            {{form.friendship_date.as_hidden}}
+                        <div class="page-header">
+                            <button type="submit" value="Submit" style=" margin-top:5px" class="btn btn-primary">Add as Friend
+                            </button>
+                        </div>
+                    </div>    
+                </form>
+            </div>
+            {%else%}
+                   <!--<button type="submit" value="Submit" style=" margin-top:5px" -->
+                   <!--class="btn btn-info">Unfriend</button>-->
+         {%endif%}
+         <h2> Friends({{friends.count}}) </h2>  
+        {%for friend in friends%}
+        {%if request.user == friend.added_friend%}
+        {%if friend.friend == username.user%}
+        <b> You are already friend, don't add {{username}} </b>
+        {%endif%}
+        {%endif%}
+
+        {%if friend.added_friend == username.user %}
+         <li> {{friend.friend.userprofile.full_name}} </li> 
+      {%else%}
+          <li> {{friend}} </li> 
+      {%endif%}
+          <p> Friend since : <b> {{friend.friendship_date}} </b> </p> 
+      
+      {%endfor%}
+        <hr>   
+        <h2> Categories </h2>  
+        {%endif%}
+         <li> {{user.category}} </li>
+        {%endfor%} 
+       </div>  
+      </div>     
+    </div>   
+  </div>
+
+
+<div class="col-md-6 blog-main" style="margin-top:40px">  
+  <div class="list-group-item">      
+  <div class="blog-post">
+      {% if name%}
+      {% for user in name %}
+      <h2 class="blog-post-title">{{user.title}} </h2>
+      <p class="blog-post-meta">{{user.publish_date}} </p>
+         {{user.body|truncatechars:400}}
+      <p>
+        <a href="/blog/{{user.id}}"> Continue to reading </a>
+      </p>
+      <hr>
+      {%endfor%}
+      {%endif%}
+      </div>     
+    </div>   
+  </div>
+
+</body>
+</html>
+

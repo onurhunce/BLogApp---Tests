@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="/static/BlogApp/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="/static/BlogApp/css/blog.css" rel="stylesheet">  
+</head>
+
+<body>
+
+   {% load blog_tags %}
+   {%main%}
+</body>
+
+</html>
+
+<div id="container">
+
+    <!-- Content -->
+    <div id="content" class="colM">
+        
+        <h1>Change your Settings</h1>
+        <div id="content-main">
+<a href="/accounts/resetpassword/"> <b> Change your Password </b> </a> 
+<form action="" method="post"><input type='hidden' name='csrfmiddlewaretoken' value='7NLygu3rAQpvui1NugbhklSJzz0pD4dN' />
+        </div>
+
+        <div>
+            {% if messages %}
+            <ul class="messages">
+            {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+    <!-- END Content -->
+
+    </div>
+</div>
+<!-- END Container -->
+
+</body>
+
+
+
+
+
