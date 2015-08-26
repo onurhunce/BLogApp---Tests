@@ -44,57 +44,6 @@ def get_posts_in_selected_category(request, category):
         "category_type": category_type})
 
 
-@login_required
-def get_user_profile_page_and_his_posts(request, username):
-    """
-    Gets current user with his/her profile information.
-    """
-    blog_name = Blog.objects.filter(
-        owner__slug_name=username).select_related('owner__user')
-    user_name = blog_name[0].owner
-    friends = Friend.objects.filter(
-        Q(friend=user_name.user) | Q(
-            added_friend=user_name.user)).select_related('added_friend')
-
-    if request.method == 'POST':
-        form = FriendForm(
-            request.POST,
-            initial={'friend': request.user, 'added_friend': user_name.user})
-        if form.is_valid():
-            form.save()
-            return HttpResponseRedirect("/user/" + username)
-        return HttpResponse("You are already friend with each other!")
-    else:
-        form = FriendForm(
-            initial={'friend': request.user, 'added_friend': user_name.user})
-
-    return render(request, "BlogApp/users.html", {'form': form,
-                                                  "name": blog_name,
-                                                  "friends": friends,
-                                                  "username": user_name
-                                                  })
-
-
-def get_friend_list_of_user(request, username):
-    blog_name = Blog.objects.filter(owner__slug_name=username).select_related(
-        'owner__user')
-    user_name = blog_name[0].owner
-
-    if request.method == 'POST':
-        form = FriendForm(
-            request.POST,
-            initial={'friend': request.user, 'added_friend': user_name.user})
-        if form.is_valid():
-            form.save()
-            return HttpResponseRedirect("/user/" + username)
-        return HttpResponse("You are already friend with each other!")
-    else:
-        form = FriendForm(
-            initial={'friend': request.user, 'added_friend': user_name.user})
-
-    return render(request, "BlogApp/users.html", {"form": form})
-
-
 def get_posts_for_selected_month(request, month):
     """
     Gets blogs for the current month.
@@ -118,7 +67,11 @@ def add_comment_to_post(request, post_id):
                          'comment_name': request.user})
         if form.is_valid():
             form.save()
+            messages.success(request, 'Your comment is added!')
             return HttpResponseRedirect("/blog/" + post_id)
+
+        messages.warning(request, 'Something went wrong!')
+        return render(request, "BlogApp/blog.html", {'form': form})
     else:
         # if user, there is no need for mail and name.
         if request.user.is_authenticated():
@@ -150,6 +103,48 @@ def get_post_detail_and_post_comments(request, blog_id):
     })
 
 
+def add_as_friend_form(request, username):
+    if request.method == 'POST':
+        form = FriendForm(
+            request.POST,
+            initial={'friend': request.user, 'added_friend': username.user})
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'You are friends!')
+
+        messages.warning(request, 'Something went wrong!')
+        return render(request, "BlogApp/blog.html", {'form': form})
+    else:
+        """
+        !Here is creating duplicated query!
+        """
+        form = FriendForm(
+            initial={'friend': request.user, 'added_friend': username.user})
+
+    return form
+
+
+@login_required
+def get_user_profile_page_and_his_posts(request, username):
+    """
+    Gets current user with his/her profile information.
+    """
+    blog_name = Blog.objects.filter(
+        owner__slug_name=username).select_related('owner__user')
+    user_name = UserProfile.objects.get(slug_name=username)
+    friends = Friend.objects.filter(
+        Q(friend=user_name.user) | Q(
+            added_friend=user_name.user)).select_related('added_friend')
+
+    form = add_as_friend_form(request, user_name)
+    return render(request, "BlogApp/users.html",
+                  {'form': form,
+                   "name": blog_name,
+                   "friends": friends,
+                   "username": user_name
+                   })
+
+
 @login_required
 def create_new_user_profile(request):
     """
@@ -160,7 +155,10 @@ def create_new_user_profile(request):
             request.POST, initial={'user': request.user.username})
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect("/")
+            return HttpResponseRedirect("../")
+
+        messages.warning(request, 'Something went wrong!')
+        return render(request, "BlogApp/create_user.html", {'form': form})
     else:
         form = UserForm(initial={'user': request.user.username})
 
@@ -173,14 +171,18 @@ def add_new_post(request):
     Adding new blog without using admin page. Problem in image adding.
     """
     blog_user = UserProfile.objects.get(
-        user__username=request.user.username)
+        user=request.user)
+    """
+    UserProfile model is an extension for User.
+    """
     if request.method == 'POST':
         form = BlogForm(request.POST, initial={'owner': blog_user})
         if form.is_valid():
             form.save()
             return HttpResponseRedirect("/")
-        else:
-            return HttpResponseRedirect(request, "BlogApp/add_blog.html")
+
+        messages.warning(request, 'Something went wrong!')
+        return render(request, "BlogApp/add_blog.html", {"form": form})
     else:
         form = BlogForm(initial={'owner': blog_user})
         return render(request, "BlogApp/add_blog.html", {

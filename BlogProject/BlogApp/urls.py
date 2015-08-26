@@ -13,6 +13,8 @@ urlpatterns = [
         name="get_blog"),
     url(r'^add_comment/([0-9]+)/$', views.add_comment_to_post,
         name="add_comment"),
+    url(r'^add_friend/([a-z_-]+)/$', views.add_as_friend_form,
+        name="add_friend"),
     url(r'^2015/([0-9]+)/$', views.get_posts_for_selected_month,
         name="get_date"),
     url(r'^add_blog', views.add_new_post, name="add_new_post"),

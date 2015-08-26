@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm, Textarea
-from BlogApp.models import Comment, Blog, UserProfile, Friend
+from BlogApp.models import Comment, Blog, UserProfile, Friend, User
 from django.utils.translation import ugettext
 from stdimage import StdImageField
 
@@ -26,11 +26,26 @@ class UserForm(ModelForm):
 
 
 class BlogForm(ModelForm):
+    owner = forms.ModelChoiceField(queryset=UserProfile.objects.all(),
+                                   widget=forms.HiddenInput())
+
     class Meta:
         model = Blog
         fields = (
             'title', 'body', 'publish_date', 'owner', 'category', 'image')
         # fields = '__all__'
+
+    # def __init__(self, *args, **kwargs):
+    #     self.user = kwargs.pop('user', None)
+    #     super(BlogForm, self).__init__(*args, **kwargs)
+    #
+    # def save(self, commit=True):
+    #     instance = super(BlogForm, self).save(commit=False)
+    #     print self.user
+    #     instance.owner = self.user
+    #     if commit:
+    #         instance.save()
+    #     return instance
 
 
 class FriendForm(ModelForm):
