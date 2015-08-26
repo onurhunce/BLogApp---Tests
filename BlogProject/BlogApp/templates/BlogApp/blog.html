@@ -34,7 +34,7 @@
             </div><!-- /.blog-post -->
 
             <div class="actionBox">
-                <form action="/blog/{{selected_blog.id}}/"  onclick="return checkform()"
+                <form action="/blog/{{selected_blog.id}}/"
                 method="POST" class="form-inline" 
                 role="form">{% csrf_token %}
                     <input type="hidden">
@@ -55,7 +55,9 @@
                             <div class="detailBox">
                                 {{form.comment_text}}
                             </div>
-                            <button type="submit" value="Submit" style=" margin-top:5px" class="btn btn-primary">Add Comment
+                            <button
+                                type="submit" value="Submit" style=" margin-top:5px"
+                                class="btn btn-primary">Add Comment
                             </button>
                               {{form.reply}}
                         </div>

@@ -7,7 +7,7 @@
 
   <body>
    {% load blog_tags %}
-   {% if login%}
+   {% if user.is_authenticated%}
     
     <a class="navbar-form navbar-right" href="/accounts/logout" style="color:white; padding-right:30px" class="button"> Log out </a>
     {%if username%}
@@ -53,10 +53,18 @@
         <div class="col-sm-8 blog-main">   
           <div class="blog-post">
             {% for blogs in all_blogs %}
-            <h2 class="blog-post-title">{{blogs.title}} </h2>
-            <p class="blog-post-meta">{{blogs.publish_date}} by <a href="/user/{{blogs.owner.slug_name}}/">{{blogs.owner}}</a></p>
-              {{blogs.body}}
+              <h2 class="blog-post-title">{{blogs.title}} </h2>
+                <p class="blog-post-meta">{{blogs.publish_date}} by
+                    <a href="/user/{{blogs.owner.slug_name}}/">{{blogs.owner}}</a>
+                </p>
+                <p>
+                    {{blogs.body|truncatechars:400}}
+                </p>
+            <p>
+              <a href="/blog/{{blogs.id}}"> Continue to reading </a>
             </p>
+              <hr>
+              <hr>
             {% endfor %}
           </div><!-- /.blog-post -->
         </div><!-- /.blog-main -->

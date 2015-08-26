@@ -4,81 +4,57 @@ from .models import Blog, Comment, UserProfile, Friend
 from BlogApp.forms import CommentForm, BlogForm, UserForm, FriendForm
 from django.contrib import messages
 from django.db.models import Q
+from django.contrib.auth.decorators import login_required
 
 
 # -*- coding: utf-8 -*-
 
 
-def login_required(get_view):
-    def wrapper(request, *args, **kwargs):
-        if request.user.is_authenticated():
-            return get_view(request, *args, **kwargs)
-        return render(request, "logout.html")
-
-    return wrapper
-
-
-def index(request):
+def index_page_with_all_posts(request):
     """
     Main page for login and register. Retrieve all blogs too.
     """
-
-    all_blogs = Blog.objects.order_by(
-        '-publish_date').prefetch_related('owner')
+    all_blogs = Blog.get_all_blogs()
     if request.user.is_authenticated():
         current_user = UserProfile.objects.get(user=request.user)
-        login_value = True
-        context = {"all_blogs": all_blogs, "login": login_value,
-                   "username": current_user}
-        return render(request, "BlogApp/index.html", context)
-    else:
-        login_value = False
-        context = {"all_blogs": all_blogs, "login": login_value}
+        return render(request, "BlogApp/index.html", {"all_blogs": all_blogs,
+                                                      "username":
+                                                          current_user})
 
-    return render(request, "BlogApp/index.html", context)
-
-
-def blogs(request):
-    """
-    Retrieve all blogs which are exists.
-    """
-    all_blogs = Blog.objects.order_by(
-        '-publish_date').prefetch_related('owner')
-    data = {"all_blogs": all_blogs}
-    return render(request, "BlogApp/blogs.html", data)
+    return render(request, "BlogApp/index.html", {"all_blogs": all_blogs})
 
 
 def categories(request):
     """
     Retrieve all categories.
     """
-    all_categories = Blog.Category_Choices
+    all_categories = Blog.category_choices
     return render(request, "BlogApp/category.html", {
         "all_categories": all_categories
     })
 
 
-def get_category(request, category):
+def get_posts_in_selected_category(request, category):
     """
     Gets current category.
     """
     category_type = Blog.objects.filter(
-        category=category).prefetch_related('owner')
+        category=category).select_related('owner')
     return render(request, "BlogApp/get_category.html", {
         "category_type": category_type})
 
 
 @login_required
-def get_user_by_name(request, username):
+def get_user_profile_page_and_his_posts(request, username):
     """
     Gets current user with his/her profile information.
     """
     blog_name = Blog.objects.filter(
-        owner__slug_name=username).prefetch_related('owner__user')
-    user_name = UserProfile.objects.get(slug_name=username)
+        owner__slug_name=username).select_related('owner__user')
+    user_name = blog_name[0].owner
     friends = Friend.objects.filter(
         Q(friend=user_name.user) | Q(
-            added_friend=user_name.user)).prefetch_related('added_friend')
+            added_friend=user_name.user)).select_related('added_friend')
 
     if request.method == 'POST':
         form = FriendForm(
@@ -99,58 +75,83 @@ def get_user_by_name(request, username):
                                                   })
 
 
-def get_date(request, month):
+def get_friend_list_of_user(request, username):
+    blog_name = Blog.objects.filter(owner__slug_name=username).select_related(
+        'owner__user')
+    user_name = blog_name[0].owner
+
+    if request.method == 'POST':
+        form = FriendForm(
+            request.POST,
+            initial={'friend': request.user, 'added_friend': user_name.user})
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect("/user/" + username)
+        return HttpResponse("You are already friend with each other!")
+    else:
+        form = FriendForm(
+            initial={'friend': request.user, 'added_friend': user_name.user})
+
+    return render(request, "BlogApp/users.html", {"form": form})
+
+
+def get_posts_for_selected_month(request, month):
     """
     Gets blogs for the current month.
     """
     blogs_in_current_month = Blog.objects.filter(
-        publish_date__month=month).prefetch_related('owner')
+        publish_date__month=month).select_related('owner')
     return render(request, "BlogApp/date.html", {
         "dates": blogs_in_current_month
     })
 
 
-def get_blog_and_comment(request, blog_id):
-    """
-    Gets current blog page and its comments.
-    """
-    selected_blog = Blog.objects.prefetch_related('owner').get(id=blog_id)
+def add_comment_to_post(request, post_id):
     if request.method == 'POST':
         form = CommentForm(
-            request.POST, initial={'comment_blog': blog_id, 'reply': blog_id})
+            request.POST, initial={'comment_blog': post_id, 'reply': post_id})
         if request.user.is_authenticated():
             form = CommentForm(
                 request.POST,
-                initial={'comment_blog': blog_id, 'reply': blog_id,
+                initial={'comment_blog': post_id, 'reply': post_id,
                          'comment_mail': request.user.email,
                          'comment_name': request.user})
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect("/blog/" + blog_id)
+            return HttpResponseRedirect("/blog/" + post_id)
     else:
         # if user, there is no need for mail and name.
         if request.user.is_authenticated():
             form = CommentForm(
-                initial={'comment_blog': blog_id,
+                initial={'comment_blog': post_id,
                          'comment_mail': request.user.email,
                          'comment_name': request.user})
         else:
-            form = CommentForm(initial={'comment_blog': blog_id})
+            form = CommentForm(initial={'comment_blog': post_id})
 
-    # retrieve all comments which belong to current blog.
+    return form
+
+
+def get_post_detail_and_post_comments(request, blog_id):
+    """
+    Gets current blog page and its comments.
+    """
+    selected_blog = Blog.objects.select_related('owner').get(id=blog_id)
+
     all_comments = Comment.objects.filter(
-        comment_blog=selected_blog.id).prefetch_related('reply')
+        comment_blog=selected_blog.id).select_related('reply')
 
     replies = all_comments.filter(
-        reply=all_comments).prefetch_related('reply')
+        reply=all_comments).select_related('reply')
+
     return render(request, "BlogApp/blog.html", {
-        'form': form, "selected_blog": selected_blog, "comments": all_comments,
-        "replies": replies
+        "selected_blog": selected_blog, "comments": all_comments,
+        "replies": replies, "form": add_comment_to_post(request, blog_id)
     })
 
 
 @login_required
-def create_user(request):
+def create_new_user_profile(request):
     """
     Create new user without using admin page.
     """
@@ -159,7 +160,7 @@ def create_user(request):
             request.POST, initial={'user': request.user.username})
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect("/blogs/")
+            return HttpResponseRedirect("/")
     else:
         form = UserForm(initial={'user': request.user.username})
 
@@ -167,7 +168,7 @@ def create_user(request):
 
 
 @login_required
-def add_blog(request):
+def add_new_post(request):
     """
     Adding new blog without using admin page. Problem in image adding.
     """
@@ -177,9 +178,9 @@ def add_blog(request):
         form = BlogForm(request.POST, initial={'owner': blog_user})
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect("/blogs/")
+            return HttpResponseRedirect("/")
         else:
-            form.non_field_errors()
+            return HttpResponseRedirect(request, "BlogApp/add_blog.html")
     else:
         form = BlogForm(initial={'owner': blog_user})
         return render(request, "BlogApp/add_blog.html", {
@@ -199,11 +200,8 @@ def settings(request):
 @login_required
 # Reset password via sending e-mail to the user
 def change_password(request):
-    current_password = request.user.password
-    user_name = request.user.username
-    return render(request, "BlogApp/settings.html", {
-        "user": user_name, "pass": current_password
-    })
+    return render(request, "BlogApp/settings.html",
+                  {"user": request.user.username})
 
 
 @login_required

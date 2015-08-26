@@ -37,7 +37,7 @@ class Friend(models.Model):
 
 class Blog(models.Model):
 
-    Category_Choices = (
+    category_choices = (
 
         ('Music', 'Music'),
         ('Sport', 'Sport'),
@@ -56,7 +56,7 @@ class Blog(models.Model):
     title = models.CharField(max_length=100)
     body = models.TextField(max_length=2000)
     category = models.CharField(
-        max_length=11, choices=Category_Choices, blank=True)
+        max_length=11, choices=category_choices, blank=True)
     publish_date = models.DateTimeField(
         'date published', default=datetime.datetime.now, blank=True,
         null=True)
@@ -67,6 +67,10 @@ class Blog(models.Model):
 
     def __unicode__(self):
         return self.title
+
+    @staticmethod
+    def get_all_blogs():
+        return Blog.objects.order_by('-publish_date').select_related('owner')
 
 
 class Comment(models.Model):
